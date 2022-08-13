@@ -6,13 +6,14 @@ from django.contrib.auth.models import User
 class UserSerializer(serializers.ModelSerializer):
   # Because snippets is a reverse relationship on the user model
   # we need to add an explicit field for it
-  snippets = serializers.PrimaryKeyRelatedField(many=True, queryset=Snippet.objects.all())
+  snippets = serializers.HyperlinkedRelatedField(many=True, view_name='snippet-detail', read_only=True)
+
 
   class Meta:
     model = User
-    fields = ['id', 'username', 'snippets']
+    fields = ['url', 'id', 'username', 'snippets']
 
-class SnippetSerializer(serializers.ModelSerializer):
+class SnippetSerializer(serializers.HyperlinkedModelSerializer):
   # Define the fields that get serialized/deserialized
 
   # id = serializers.IntegerField(read_only=True)
@@ -25,9 +26,11 @@ class SnippetSerializer(serializers.ModelSerializer):
 
   # Replace the above with a ModelSerializer more concise alternative
   owner = serializers.ReadOnlyField(source='owner.username')
+  highlight = serializers.HyperlinkedIdentityField(view_name='snippet-highlight', format='html')
+
   class Meta:
     model = Snippet
-    fields = ['id', 'title', 'code', 'linenos', 'language', 'style', 'owner']
+    fields = ['url', 'id', 'highlight', 'owner', 'title', 'code', 'linenos', 'language', 'style']
 
   # This methods are already provided by ModelSerializer
   
