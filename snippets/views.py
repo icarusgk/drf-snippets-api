@@ -15,7 +15,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework import renderers
-
+from rest_framework import viewsets
+from rest_framework.decorators import action
 
 
 
@@ -29,39 +30,69 @@ def api_root(request, format=None):
   })
 
 
-class SnippetHighlight(generics.GenericAPIView):
-  queryset = Snippet.objects.all()
-  renderer_classes = [renderers.StaticHTMLRenderer]
 
-  def get(self, request, *args, **kwargs):
-    snippet = self.get_object()
-    return Response(snippet.highlighted)
+
+# class SnippetHighlight(generics.GenericAPIView):
+#   queryset = Snippet.objects.all()
+#   renderer_classes = [renderers.StaticHTMLRenderer]
+
+#   def get(self, request, *args, **kwargs):
+#     snippet = self.get_object()
+#     return Response(snippet.highlighted)
     
+# class UserList(generics.ListAPIView):
+#   queryset = User.objects.all()
+#   serializer_class = UserSerializer
 
-class UserList(generics.ListAPIView):
-  queryset = User.objects.all()
-  serializer_class = UserSerializer
+# class UserDetail(generics.RetrieveAPIView):
+#   queryset = User.objects.all()
+#   serializer_class = UserSerializer
 
-class UserDetail(generics.RetrieveAPIView):
-  queryset = User.objects.all()
-  serializer_class = UserSerializer
-
-# Listing all the existing snippets or creating a new snippet
-class SnippetList(generics.ListCreateAPIView):
+# Refactor into a single viewset
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
   """
-  List all code snippets, or create a new snippet
+  This viewset automatically provides `list` and `retrieve` actions.
+  """
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+
+# Refactor the snippets into a single viewset
+class SnippetViewSet(viewsets.ModelViewSet):
+  """
+  This viewset automatically provides `list`, `create`, `retrieve`,
+  `update` and `destroy` actions.
+
+  Additionally we also provide an extra `highlight` action.
   """
 
   queryset = Snippet.objects.all()
   serializer_class = SnippetSerializer
-  permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+  permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly] 
 
-  # .perform_create() method on our snippet views, that allows us to modify 
-  # how the instance save is managed, and handle any information that 
-  # is implicit in the incoming request or requested URL.
+  @action(detail=True, renderer_classes=[renderers.StaticHTMLRenderer])
+  def highlight(self, request, *args, **kwargs):
+    snippet = self.get_object()
+    return Response(snippet.highlighted)
 
   def perform_create(self, serializer):
     serializer.save(owner=self.request.user)
+
+# # Listing all the existing snippets or creating a new snippet
+# class SnippetList(generics.ListCreateAPIView):
+#   """
+#   List all code snippets, or create a new snippet
+#   """
+
+#   queryset = Snippet.objects.all()
+#   serializer_class = SnippetSerializer
+#   permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+#   # .perform_create() method on our snippet views, that allows us to modify 
+#   # how the instance save is managed, and handle any information that 
+#   # is implicit in the incoming request or requested URL.
+
+#   def perform_create(self, serializer):
+#     serializer.save(owner=self.request.user)
 
   # The create() method of our serializer will now be passed an additional 
   # 'owner' field, along with the validated data from the request.
@@ -109,13 +140,13 @@ class SnippetList(generics.ListCreateAPIView):
   #   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
-  """
-  Retrieve, update or delete a code snippet
-  """
-  queryset = Snippet.objects.all()
-  serializer_class = SnippetSerializer
-  permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+# class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
+#   """
+#   Retrieve, update or delete a code snippet
+#   """
+#   queryset = Snippet.objects.all()
+#   serializer_class = SnippetSerializer
+#   permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
   # def get(self, request, *args, **kwargs):
   #   return self.retrieve(request, *args, **kwargs)
