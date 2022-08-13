@@ -3,7 +3,7 @@
 # from rest_framework.parsers import JSONParser
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
-from rest_framework import mixins
+# from rest_framework import mixins
 from rest_framework import generics
 # from rest_framework import status
 # from django.http import Http404
@@ -13,8 +13,7 @@ from rest_framework import generics
 
 
 # Listing all the existing snippets or creating a new snippet
-class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+class SnippetList(generics.ListCreateAPIView):
   """
   List all code snippets, or create a new snippet
   """
@@ -27,11 +26,11 @@ class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin,
   # We're then explicitly binding the get and post methods to
   # the appropriate actions.
 
-  def get(self, request, *args, **kwargs):
-    return self.list(request, *args, **kwargs)
+  # def get(self, request, *args, **kwargs):
+  #   return self.list(request, *args, **kwargs)
 
-  def post(self, request, *args, **kwargs):
-    return self.create(request, *args, **kwargs)
+  # def post(self, request, *args, **kwargs):
+  #   return self.create(request, *args, **kwargs)
 
   # Part 3 Class Based Views
   # def get(self, request, format=None):
@@ -65,24 +64,21 @@ class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin,
   #   return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class SnippetDetail(mixins.RetrieveModelMixin,
-                    mixins.UpdateModelMixin,
-                    mixins.DestroyModelMixin,
-                    generics.GenericAPIView):
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
   """
   Retrieve, update or delete a code snippet
   """
   queryset = Snippet.objects.all()
   serializer_class = SnippetSerializer
 
-  def get(self, request, *args, **kwargs):
-    return self.retrieve(request, *args, **kwargs)
+  # def get(self, request, *args, **kwargs):
+  #   return self.retrieve(request, *args, **kwargs)
 
-  def put(self, request, *args, **kwargs):
-    return self.update(request, *args, **kwargs)
+  # def put(self, request, *args, **kwargs):
+  #   return self.update(request, *args, **kwargs)
 
-  def delete(self, request, *args, **kwargs):
-    return self.delete(request, *args, **kwargs)
+  # def delete(self, request, *args, **kwargs):
+  #   return self.delete(request, *args, **kwargs)
 
   # def get_object(self, pk):
   #   try:
