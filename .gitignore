@@ -1,0 +1,5 @@
+snippets/__pycache__/
+tutorial/__pycache__/
+tutorial/settings.py
+
+db.sqlite3
